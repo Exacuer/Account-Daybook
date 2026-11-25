@@ -3,13 +3,17 @@
 
 frappe.query_reports["Account Daybook"] = {
 	filters: [
-        { fieldname: "company",
+        {
+            fieldname: "company",
             label: __("Company"),
-            fieldtype: "Link",
-            width: "80",
+            fieldtype: "MultiSelectList",
             options: "Company",
             reqd: 1,
-            default: frappe.defaults.get_default("company"), },
+            default: frappe.defaults.get_default("company") ? [frappe.defaults.get_default("company")] : [],
+            get_data: function (txt) {
+                return frappe.db.get_link_options("Company", txt);
+            },
+        },
         {
             fieldname: "from_date",
             label: "From Date",

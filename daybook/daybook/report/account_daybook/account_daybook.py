@@ -1674,10 +1674,18 @@ def get_rate_to_inr(from_currency: str, on_date=None) -> float:
     return 1.0
 
 
-def get_gl_entries_by_voucher(company=None):
+def get_company_list(raw) -> list:
+    if not raw:
+        return []
+    if isinstance(raw, str):
+        raw = frappe.parse_json(raw) if raw.startswith("[") else raw.split(",")
+    return [c.strip() for c in raw if c and c.strip()]
+
+
+def get_gl_entries_by_voucher(companies=None):
     gl_filters = {"docstatus": 1}
-    if company:
-        gl_filters["company"] = company
+    if companies:
+        gl_filters["company"] = ["in", companies]
 
     gl_entries = frappe.get_all(
         "GL Entry",
@@ -1714,7 +1722,7 @@ def get_gl_entries_by_voucher(company=None):
 
 def execute(filters=None):
     filters = filters or {}
-    company_filter = filters.get("company")
+    company_filter = get_company_list(filters.get("company"))
 
     # parse optional doctype filter
     doctype_filter = set()
@@ -1729,6 +1737,7 @@ def execute(filters=None):
 
     # Columns
     columns = [
+        {"label": "Company", "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 180},
         {"label": "Document Type", "fieldname": "doctype", "fieldtype": "Data", "width": 150},
         {"label": "Document / Item / Payment", "fieldname": "doc_name", "fieldtype": "Dynamic Link", "options": "doctype", "width": 300},
         {"label": "Reference Doc", "fieldname": "reference_doc", "fieldtype": "Data", "width": 250},
@@ -1759,7 +1768,6 @@ def execute(filters=None):
 
         {"label": "Amount (Transaction)", "fieldname": "amount_transaction", "fieldtype": "Currency", "options": "currency", "width": 140},
 
-        {"label": "Company", "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 180},
         {"label": "Account Effect", "fieldname": "account_effect", "fieldtype": "Data", "width": 120},
 
         {"label": "Transaction Date", "fieldname": "txn_date", "fieldtype": "Date", "width": 120},
@@ -1854,7 +1862,7 @@ def execute(filters=None):
         # filters
         filters_dict = {"docstatus": 1}
         if "company" in available_fields and company_filter:
-            filters_dict["company"] = company_filter
+            filters_dict["company"] = ["in", company_filter]
         if date_field and filters and filters.get("from_date") and filters.get("to_date"):
             filters_dict[date_field] = ["between", [filters["from_date"], filters["to_date"]]]
 
@@ -2084,7 +2092,7 @@ def execute(filters=None):
 
             for pref in payment_refs:
                 payment_entry = frappe.get_doc("Payment Entry", pref.parent)
-                if company_filter and payment_entry.company != company_filter:
+                if company_filter and payment_entry.company not in company_filter:
                     continue
                 if doctype_filter and doctype not in doctype_filter:
                     continue
