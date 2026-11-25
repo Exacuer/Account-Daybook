@@ -13,7 +13,7 @@ DETAIL_COLUMNS = [
 
 
 def get_accounts_in_tree_order(company: str) -> list[dict]:
-	"""Accounts of the company in depth-first tree order, each with its `level` (1 = root)."""
+	"""Accounts of the company in depth-first tree order, each with its `path` of account names from the root."""
 	accounts = frappe.get_list(
 		"Account",
 		filters={"company": company},
@@ -21,25 +21,24 @@ def get_accounts_in_tree_order(company: str) -> list[dict]:
 		order_by="lft asc",
 	)
 
-	level_by_name = {}
+	path_by_name = {}
 	for account in accounts:
-		account.level = level_by_name.get(account.parent_account, 0) + 1
-		level_by_name[account.name] = account.level
+		account.path = path_by_name.get(account.parent_account, []) + [account.account_name]
+		path_by_name[account.name] = account.path
 
 	return accounts
 
 
 def get_chart_of_accounts_rows(company: str) -> list[list]:
 	accounts = get_accounts_in_tree_order(company)
-	depth = max((account.level for account in accounts), default=1)
+	depth = max((len(account.path) for account in accounts), default=1)
 
 	header = [_("Level {0}").format(level) for level in range(1, depth + 1)]
 	header += [_(label) for _field, label in DETAIL_COLUMNS]
 	rows = [header]
 
 	for account in accounts:
-		levels = [""] * depth
-		levels[account.level - 1] = account.account_name
+		levels = account.path + [""] * (depth - len(account.path))
 		account.is_group = _("Yes") if account.is_group else _("No")
 		rows.append(levels + [account.get(field) for field, _label in DETAIL_COLUMNS])
 
