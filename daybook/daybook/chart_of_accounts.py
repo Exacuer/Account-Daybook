@@ -1,4 +1,5 @@
 import frappe
+from erpnext.accounts.utils import get_account_balances_coa
 from frappe import _
 from frappe.utils.xlsxutils import build_xlsx_response
 
@@ -35,12 +36,22 @@ def get_chart_of_accounts_rows(company: str) -> list[list]:
 
 	header = [_("Level {0}").format(level) for level in range(1, depth + 1)]
 	header += [_(label) for _field, label in DETAIL_COLUMNS]
+	header += [_("Amount"), _("Dr/Cr")]
 	rows = [header]
+
+	balance_by_account = {
+		row["value"]: row["balance"] or 0
+		for row in get_account_balances_coa(company, include_default_fb_balances=True)
+	}
 
 	for account in accounts:
 		levels = account.path + [""] * (depth - len(account.path))
 		account.is_group = _("Yes") if account.is_group else _("No")
-		rows.append(levels + [account.get(field) for field, _label in DETAIL_COLUMNS])
+		balance = balance_by_account.get(account.name, 0)
+		dr_or_cr = _("Dr") if balance > 0 else _("Cr") if balance < 0 else ""
+		rows.append(
+			levels + [account.get(field) for field, _label in DETAIL_COLUMNS] + [abs(balance), dr_or_cr]
+		)
 
 	return rows
 
