@@ -27,6 +27,7 @@ app_license = "mit"
 # include js, css files in header of desk.html
 # app_include_css = "/assets/daybook/css/daybook.css"
 # app_include_js = "/assets/daybook/js/daybook.js"
+app_include_js = "/assets/daybook/report_column_settings.js"
 
 # include js, css files in header of web template
 # web_include_css = "/assets/daybook/css/daybook.css"
@@ -136,6 +137,15 @@ doctype_tree_js = {"Account": "public/chart_of_accounts.js"}
 # Document Events
 # ---------------
 # Hook on document methods and events
+
+doc_events = {
+	"Report": {
+		"on_trash": "daybook.daybook.doctype.report_column_layout.report_column_layout.delete_layouts_of_report"
+	},
+	"User": {
+		"on_trash": "daybook.daybook.doctype.report_column_layout.report_column_layout.delete_layouts_of_user"
+	},
+}
 
 # doc_events = {
 # 	"*": {

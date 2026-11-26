@@ -2,6 +2,11 @@
 
 daybook
 
+### Features
+
+- **Chart of Accounts export**: the Account tree menu has "Export to Excel". The file has the account levels, account details, the balance amount in company currency, and Dr/Cr.
+- **Report column settings**: every query and script report has a "Column Settings" icon (sliders) next to the Reload and Print icons. A user can drag columns to change the order and clear a checkbox to hide a column. Each user saves an own layout. A System Manager can select "Save as default for everyone" to set the default layout. "Reset to Default" removes the saved layout. The layouts are in the Report Column Layout DocType.
+
 ### Installation
 
 You can install this app using the [bench](https://github.com/frappe/bench) CLI:
