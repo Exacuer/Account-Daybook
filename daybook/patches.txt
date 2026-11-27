@@ -4,3 +4,4 @@
 
 [post_model_sync]
 # Patches added in this section will be executed after doctypes are migrated
+daybook.patches.create_read_role_assign_permission_to_all_doctype
