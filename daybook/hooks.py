@@ -44,6 +44,9 @@ app_include_js = "/assets/daybook/report_column_settings.js"
 # page_js = {"page" : "public/js/file.js"}
 
 # include js in doctype views
+doctype_js = {
+	"Purchase Order": "public/js/buying/purchase_order.js",
+}
 # doctype_js = {"doctype" : "public/js/doctype.js"}
 # doctype_list_js = {"doctype" : "public/js/doctype_list.js"}
 doctype_tree_js = {"Account": "public/chart_of_accounts.js"}
@@ -84,7 +87,9 @@ doctype_tree_js = {"Account": "public/chart_of_accounts.js"}
 # ------------
 
 # before_install = "daybook.install.before_install"
-# after_install = "daybook.install.after_install"
+# Custom fields / property setters for standard doctypes (see daybook/setup/install.py)
+after_install = "daybook.setup.install.run"
+after_migrate = "daybook.setup.install.run"
 
 # Uninstallation
 # ------------
@@ -144,6 +149,12 @@ doc_events = {
 	},
 	"User": {
 		"on_trash": "daybook.daybook.doctype.report_column_layout.report_column_layout.delete_layouts_of_user"
+	},
+	"Purchase Order": {
+		"validate": "daybook.buying.purchase_order.events.validate",
+	},
+	"Project": {
+		"validate": "daybook.projects.project.events.validate",
 	},
 }
 
